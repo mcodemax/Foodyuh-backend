@@ -1,1 +1,4 @@
 /node_modules
+todos.txt
+secret.env
+secret.js
