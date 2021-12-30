@@ -93,8 +93,21 @@ async function searchFdcApi(foodQuery) {
     }
 }
 
-/** Gets the nutrients */
-function getWantedNutrients(array){
+/** API call a single food from fdcId*/
+async function getSingFood(id){
+    const nutrientNumArr = [208,204,203,301,401,291,205];
+    let nutStr = nutrientNumArr.join('&nutrients=');
+    nutStr = '&nutrients='.concat(nutStr);
+
+    console.log(nutStr)
+    
+    try {
+        const res = await axios.get(`https://api.nal.usda.gov/fdc/v1/food/2087659?format=abridged${nutStr}&api_key=${SECRET_API_KEY}`)
+        console.log(res.data)
+    } catch (error) {
+        return new Error(`FDC API error. code: ${error.response.data.error.code},
+         message: ${error.response.data.error.message}`);
+    }
     //for array of nutrients in an individual food
     //
 
@@ -124,6 +137,7 @@ function dummy(){
 
     {//cals
         "nutrientId": 1008,
+        "nutrientNumber": "208",
         "nutrientName": "Energy",
         "unitName": "KCAL",
         "value": "200",
@@ -131,6 +145,7 @@ function dummy(){
     },
     {//total fats
           "nutrientId": 1004,
+          "nutrientNumber": "204",
           "nutrientName": "Total lipid (fat)",
           "unitName": "G",
           "value": 30.8,
@@ -138,6 +153,7 @@ function dummy(){
     },
     {//prot
           "nutrientId": 1003,
+          "nutrientNumber": "203",
           "nutrientName": "Protein",
           "unitName": "G",
           "value": 23.1,
@@ -145,6 +161,7 @@ function dummy(){
     },
     {
           "nutrientId": 1087,
+          "nutrientNumber": "301",
           "nutrientName": "Calcium, Ca",
           "unitName": "MG"
           "value": 154,
@@ -152,6 +169,7 @@ function dummy(){
     },
     {
           "nutrientId": 1162,
+          "nutrientNumber": "401",
           "nutrientName": "Vitamin C, total ascorbic acid",
           "unitName": "MG",
           "value": 0
@@ -159,6 +177,8 @@ function dummy(){
     },
     {
           "nutrientId": 1079,
+          "nutrientNumber": "291",
+          "nutrientNumber": "291",
           "nutrientName": "Fiber, total dietary",
           "unitName": "G",
           "value": 0,
@@ -166,6 +186,7 @@ function dummy(){
     },
     {
           "nutrientId": 1005,
+          "nutrientNumber": "205",
           "nutrientName": "Carbohydrate, by difference",
           "unitName": "G",
           "value": 0,

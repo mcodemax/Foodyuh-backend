@@ -17,19 +17,17 @@ CREATE TABLE plates (
     REFERENCES users ON DELETE CASCADE
 );
 
-CREATE TABLE jobs (
+-- CREATE TABLE plates_users (
+--   plate_id INTEGER
+--     REFERENCES plates ON DELETE CASCADE,
+--   username VARCHAR(25)
+--     REFERENCES users ON DELETE CASCADE
+-- ); --may not be needed in schema
+
+CREATE TABLE plates_foods (
   id SERIAL PRIMARY KEY,
-  title TEXT NOT NULL,
-  salary INTEGER CHECK (salary >= 0),
-  equity NUMERIC CHECK (equity <= 1.0),
-  company_handle VARCHAR(25) NOT NULL
-    REFERENCES companies ON DELETE CASCADE
+  plate_id INTEGER
+    REFERENCES plates ON DELETE CASCADE,
+  fdc_id TEXT NOT NULL --make into a number when coding into js
 );
 
-CREATE TABLE applications (
-  username VARCHAR(25)
-    REFERENCES users ON DELETE CASCADE,
-  job_id INTEGER
-    REFERENCES jobs ON DELETE CASCADE,
-  PRIMARY KEY (username, job_id)
-);
