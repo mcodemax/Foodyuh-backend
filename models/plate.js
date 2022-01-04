@@ -28,10 +28,9 @@ class Plate {
            FROM plates
            WHERE username = $1`,
         [username],
-    );
+    ); //database throws err if user dne
 
-
-    //make a set for name(plateName) 
+    //prevents duplicate plates for the same user
     for(const plate of duplicateCheck.rows){
         if (plate.name === name) {
             throw new BadRequestError(`Duplicate plate: ${plate.name}`);
@@ -57,100 +56,145 @@ class Plate {
     return plate;
   }
 
-  /** Given a username, return data about user.
+  /** Given a plate id give info about the plate.
    *
-   * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   * Returns { id, name, description, username, foods }
+   *   where foods is { foodId, plateId, fdcId }
    *
-   * Throws NotFoundError if user not found.
+   * Throws NotFoundError if plate not found.
    **/
-
-  static async get(username) {
-    const userRes = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin",
-                  is_paid AS "isPaid"
-           FROM users
-           WHERE username = $1`,
-        [username],
+  static async get(plateId) {
+    const plateRes = await db.query(
+          `SELECT id,
+                  name,
+                  description,
+                  username
+           FROM plates
+           WHERE id = $1`,
+        [plateId],
     );
 
-    const user = userRes.rows[0];
+    const plate = plateRes.rows[0];
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    if (!plate) throw new NotFoundError(`No plate id: ${id}`);
 
-    return user;
+    const foodsRes = await db.query(
+        `SELECT id,
+                plate_id AS "plateId",
+                fdc_id AS "fdcId"
+         FROM plates_foods
+         WHERE plates_foods.plate_id = $1`, [plateId]);
+
+    plate.foods = foodsRes.rows; //may need to type coerse the fdcId UI later str>int
+
+    return plate;
   }
 
-  /** Update user data with `data`.
-   *
-   * This is a "partial update" --- it's fine if data doesn't contain
-   * all the fields; this only changes provided ones.
-   *
-   * Data can include:
-   *   { firstName, lastName, password, email, isAdmin, isPaid }
-   *
-   * Returns { username, firstName, lastName, email, isAdmin, isPaid }
-   *
-   * Throws NotFoundError if not found.
-   *
-   * WARNING: this function can set a new password or make a user an admin.
-   * Callers of this function must be certain they have validated inputs to this
-   * or a serious security risks are opened.
-   */
+//in REPL
+  //node -i -e "$(< plate.js)"
+  //promiseX.then(e => console.log(e))
 
-  static async update(username, data) {
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-    }
 
-    const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          firstName: "first_name",
-          lastName: "last_name",
-          isAdmin: "is_admin",
-          isPaid: "is_paid",
-        });
-    const usernameVarIdx = "$" + (values.length + 1);
 
-    const querySql = `UPDATE users 
-                      SET ${setCols} 
-                      WHERE username = ${usernameVarIdx} 
-                      RETURNING username,
-                                first_name AS "firstName",
-                                last_name AS "lastName",
-                                email,
-                                is_admin AS "isAdmin",
-                                is_paid AS "isPaid"`;
-    const result = await db.query(querySql, [...values, username]);
-    const user = result.rows[0];
+  //possibly add method to update name and desc of plate
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
 
-    delete user.password;
-    return user;
-  }
 
-  /** Delete given user from database; returns undefined. */
+  /** Delete given plate from database; returns undefined. */
 
-  static async remove(username) {
+  static async remove(id) {//test in repl
     let result = await db.query(
           `DELETE
-           FROM users
-           WHERE username = $1
-           RETURNING username`,
-        [username],
+           FROM plates
+           WHERE id = $1
+           RETURNING id, name`,
+        [id],
     );
-    const user = result.rows[0];
+    const plate = result.rows[0];
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    if (!plate) throw new NotFoundError(`No plate: ${id}`);
   }
 
-  
+  /** Adds a food to plate
+   * I: plateId, fdcId
+   * O: { id, plateId, fdcId }
+   */
+  static async addFood(plateId, fdcId) {//test in repl
+
+    //currently allows duplicate fdc_id entries
+    //makes sure plate exists
+    const plateRes = await db.query(
+          `SELECT id,
+                  name,
+                  description,
+                  username
+           FROM plates
+           WHERE id = $1`,
+        [plateId],
+    );
+    const plate = plateRes.rows[0];
+
+    if (!plate) throw new NotFoundError(`No plate id: ${plateId}. Cannot add food`);
+
+    let result = await db.query(
+          `INSERT INTO plates_foods
+           (
+            plate_id,
+            fdc_id
+           )
+           VALUES ($1, $2)
+           RETURNING plate_id AS "plateId", fdc_id AS "fdcId"`,
+        [plateId, fdcId],
+    );
+
+    const newFood = result.rows[0];
+
+    //need eror checking to makesure valid fdcId???
+
+    return newFood;
+  }
+
+  /**
+   * 
+   * @param {*} plateId 
+   * @param {*} fdcId, string
+   * @returns undefined
+   */
+  static async deleteFood(plateId, fdcId) {//test in repl
+    let delId;
+    //might need another req frst
+    //ask how2delete
+
+    //get list of all foods from plates_foods that has plate_id from input
+    //loop thru list^ and find the plates_foods id you need
+    //query the id and delete it
+        //make sure plateId exists (from input)
+        //make sure fdcId exists (input)
+
+    const plate = await this.get(plateId);//will auto throw err if plateId DNE
+    
+    const foodToDel = plate.foods.find(food => food.fdcId === fdcId);
+    
+    if(foodToDel){
+        delId = foodToDel.id;
+    }else{
+        throw new NotFoundError(`No fdcId ${fdcId} in plate`);
+    }
+
+    let result = await db.query(
+          `DELETE
+           FROM plates_foods
+           WHERE id = $1
+           RETURNING plate_id AS "plateId", fdc_id AS "fdcId"`,
+        [delId],
+    );
+    
+    const food = result.rows[0];
+
+    if (!food) throw new NotFoundError(`No food id: ${fdcId}`);
+  }
+
+  //need addFood and removeFood Plate method  
 }
 
 

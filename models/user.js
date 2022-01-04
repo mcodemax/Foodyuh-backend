@@ -120,13 +120,13 @@ class User {
 
   /** Given a username, return data about user.
    *
-   * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   * Returns { username, first_name, last_name, is_admin, plates }
+   *   where plates is { id, name, description }
    *
    * Throws NotFoundError if user not found.
    **/
 
-  static async get(username) {
+  static async get(username) { //test in repl; done.
     const userRes = await db.query(
           `SELECT username,
                   first_name AS "firstName",
@@ -143,8 +143,19 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
+    const userPlatesRes = await db.query(
+          `SELECT id, name, description
+           FROM plates
+           WHERE username = $1`, [username]);
+
+    user.plates = userPlatesRes.rows;
+
     return user;
   }
+
+  //in REPL
+  //node -i -e "$(< user.js)"
+  //promiseX.then(e => console.log(e))
 
   /** Update user data with `data`.
    *

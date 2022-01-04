@@ -32,7 +32,7 @@ const FDC_BASE_URL = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=`
  *  ^For above possibly have a picture link stored in  above plate's table schema;
  *      -so another API call can be made to  pexels
  */
-async function searchFdcApi(foodQuery) {
+async function searchFdcApi(foodQuery) { //this may be better suited for the UI
     const query = {
         "query": `${foodQuery}`,
         "pageSize": 25,
