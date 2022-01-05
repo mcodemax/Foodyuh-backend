@@ -6,7 +6,9 @@ require("dotenv").config(); //maybe revet to this ifthere's errors; require("dot
 //might need to hchange this to default hen deploying app to heroku
 require("colors");
 
+const SECRET_KEY = process.env.SECRET_KEY || "secret-dev"; //for authentication
 
+//maybe move to frontend
 const {SECRET_API_KEY} = process.env.FDC_API_KEY ? {SECRET_API_KEY: null} : require('./secret');
 //https://itnext.io/how-to-use-environment-variables-in-node-js-cb2ef0e9574a
 const FDC_API_KEY = process.env.FDC_API_KEY || SECRET_API_KEY;
@@ -38,6 +40,7 @@ console.log("---");
 
 module.exports = {
   FDC_API_KEY,
+  SECRET_KEY,
   PORT,
   BCRYPT_WORK_FACTOR,
   getDatabaseUri,
