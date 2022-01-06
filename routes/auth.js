@@ -8,7 +8,7 @@ const User = require("../models/user");
 const express = require("express");
 const router = new express.Router();
 const { createToken } = require("../helpers/tokens");
-const userAuthSchema = require("../schemas/userAuth.json");
+const userAuthSchema = require("../schemas/userAuth.json"); 
 const userRegisterSchema = require("../schemas/userRegister.json");
 const { BadRequestError } = require("../expressError");
 
@@ -40,7 +40,7 @@ router.post("/token", async function (req, res, next) {
 /** POST /auth/register:   { user } => { token }
  *
  * user must include { username, password, firstName, lastName, email }
- *
+ * e.g.  { "username":"trouble55", "password":"password", "firstName":"Paulie", "lastName":"George", "email":"no@polly.com" }
  * Returns JWT token which can be used to authenticate further requests.
  *
  * Authorization required: none

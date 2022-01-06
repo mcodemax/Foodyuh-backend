@@ -29,7 +29,7 @@ class Plate {
            WHERE username = $1`,
         [username],
     ); //database throws err if user dne
-
+    
     //prevents duplicate plates for the same user
     for(const plate of duplicateCheck.rows){
         if (plate.name === name) {
@@ -50,7 +50,7 @@ class Plate {
           username
         ],
     );
-
+    console.log({ name, description, username })
     const plate = result.rows[0];
 
     return plate;

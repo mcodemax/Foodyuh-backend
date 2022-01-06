@@ -6,35 +6,37 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const { ensureAdmin } = require("../middleware/auth");
+const { ensureAdmin, ensureLoggedIn, ensureCorrectUserOrAdmin } = require("../middleware/auth");
 const Plate = require("../models/plate");
 
-const plateNewSchema = require("../schemas/plateNew.json");
-const plateUpdateSchema = require("../schemas/plateUpdate.json");
-const plateSearchSchema = require("../schemas/plateSearch.json");
+const plateNewSchema = require("../schemas/plateNew.json"); //name ltd to 25 chars
+// const plateUpdateSchema = require("../schemas/plateUpdate.json");
+// const plateSearchSchema = require("../schemas/plateSearch.json");
 
 const router = new express.Router();
 
 
-/** POST / { company } =>  { company }
+/** POST / { plate } =>  { plate }
  *
- * company should be { handle, name, description, numEmployees, logoUrl }
+ * plate should be { name, description }
  *
- * Returns { handle, name, description, numEmployees, logoUrl }
+ * Returns { id, name, description, username }
  *
- * Authorization required: admin
+ * Authorization required: loggedIn
  */
-
-router.post("/", ensureAdmin, async function (req, res, next) {
+router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.body, companyNewSchema);
+    req.body.username = res.locals.user.username; //determines what user is making the plate in an obj
+    console.log(res.locals.user)
+    const validator = jsonschema.validate(req.body, plateNewSchema);
+    console.log(req.body)
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
     }
 
-    const company = await Company.create(req.body);
-    return res.status(201).json({ company });
+    const plate = await Plate.makePlate(req.body);
+    return res.status(201).json({ plate });
   } catch (err) {
     return next(err);
   }
