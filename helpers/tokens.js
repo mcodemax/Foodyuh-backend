@@ -9,7 +9,7 @@ function createToken(user) {
 
   console.assert(user.isPaid !== undefined,
       "createToken passed user without isPaid property");//writes err msg if false
-
+    console.log(user)
   let payload = {
     username: user.username,
     isAdmin: user.isAdmin || false,
