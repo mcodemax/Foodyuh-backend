@@ -5,7 +5,7 @@
 const jsonschema = require("jsonschema");
 const express = require("express");
 
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, UnauthorizedError } = require("../expressError");
 const { ensureAdmin, ensureLoggedIn, ensureCorrectUserOrAdmin } = require("../middleware/auth");
 const Plate = require("../models/plate");
 const User = require("../models/user");
@@ -43,9 +43,29 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-/** GET /  =>
+
+/** DELETE /delete/[plateId] => { deletedPlate }
+ * deletes a plate
+ */
+router.delete("/delete/:plateId", ensureLoggedIn, async function (req, res, next) {
+  try {
+    //make sure the plate being deleted belongs to the user
+    // if not throw an err
+    const plate = await Plate.get(req.params.plateId)
+    if(res.locals.user.username !== plate.username) {
+      throw new UnauthorizedError('Unauthorized: This user cannot delete this plate')
+    }
+    await Plate.remove(req.params.plateId)
+
+    return res.json({ deletedPlate: {...plate} });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** GET /  => { user }
  * Get a current loggedin users info (password ommitted)
- * Returns { username, first_name, last_name, isAdmin, isPaid, plates }
+ * Returns { user } where user is { username, first_name, last_name, isAdmin, isPaid, plates }
  * where plates is { id, name, description }
  * Authorization required: LoggedIn
  */
@@ -78,12 +98,16 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-/** POST / { plateId }  =>  { food }
+/** POST /[plateId] {fdcId} =>  { plate }
+ * 
+ * Route for adding a food to a plate
+ * 
  * plateId passed in url
  * Req Body: { fdcId } //fdcId is text NOT integer
  * 
  * Returns Plate which is { id, name, description, username, foods }
  *   where foods is { foodId, plateId, fdcId }, fdcId is used to get nutrient profile
+ * 
  * Authorization required: LoggedIn
  */
  router.post("/:plateId", ensureLoggedIn, async function (req, res, next) {
@@ -95,13 +119,43 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
 
     const plate = await Plate.get(req.params.plateId);
 
+    return res.status(201).json({ plate });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** DELETE /[plateId] => { plate }
+ * 
+ * route for deleting a food (fdcId) in a plate
+ * 
+ * plateId passed in url
+ * Req Body: { fdcId } //fdcId is text NOT integer
+ * 
+ * Returns Plate which is { id, name, description, username, foods, deletedFood }
+ *   where foods is { foodId, plateId, fdcId }, fdcId is used to get nutrient profile
+ * 
+ * Authorization required: LoggedIn
+ */
+ router.delete("/:plateId", ensureLoggedIn, async function (req, res, next) {
+  
+  try {
+    //add food to plate with req.body
+    const food = await Plate.deleteFood(req.params.plateId, req.body.fdcId); //aside: list of fdcId's to 
+    //pass into here will be generated from food.js in frontend most likely
+
+    const plate = await Plate.get(req.params.plateId);
+    plate.deletedFood = {fdcId: req.body.fdcId};
+
     return res.json({ plate });
   } catch (err) {
     return next(err);
   }
 });
 
-/** PATCH /[handle] { fld1, fld2, ... } => { company }
+
+//maybe use this route-skeleton to edit a plate's description or name
+/** PATCH /[handle] { fld1, fld2, ... } => { company } 
  *
  * Patches company data.
  *
@@ -111,7 +165,6 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
  *
  * Authorization required: admin
  */
-
 router.patch("/:handle", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
@@ -127,19 +180,14 @@ router.patch("/:handle", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** DELETE /[handle]  =>  { deleted: handle }
- *
- * Authorization: admin
- */
-
-router.delete("/:handle", ensureAdmin, async function (req, res, next) {
-  try {
-    await Company.remove(req.params.handle);
-    return res.json({ deleted: req.params.handle });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-
 module.exports = router;
+
+/*
+Summary of routes:
+  POST / { plate } =>  { plate }
+  DELETE /delete/[plateId] => { deletedPlate }
+  GET /  => { user }
+  GET /[plateId]  =>  { plate }
+  POST /[plateId] {fdcId} =>  { plate }
+  DELETE /[plateId] => { plate }
+*/
