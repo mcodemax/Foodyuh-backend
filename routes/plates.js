@@ -8,6 +8,7 @@ const express = require("express");
 const { BadRequestError } = require("../expressError");
 const { ensureAdmin, ensureLoggedIn, ensureCorrectUserOrAdmin } = require("../middleware/auth");
 const Plate = require("../models/plate");
+const User = require("../models/user");
 
 const plateNewSchema = require("../schemas/plateNew.json"); //name ltd to 25 chars
 // const plateUpdateSchema = require("../schemas/plateUpdate.json");
@@ -43,47 +44,58 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /** GET /  =>
- *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
- *
- * Can filter on provided search filters:
- * - minEmployees
- * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
- *
- * Authorization required: none
+ * Get a current loggedin users info (password ommitted)
+ * Returns { username, first_name, last_name, isAdmin, isPaid, plates }
+ * where plates is { id, name, description }
+ * Authorization required: LoggedIn
  */
-router.get("/", async function (req, res, next) { 
-  const q = req.query;
-  // arrive as strings from querystring, but we want as ints
-  if (q.minEmployees !== undefined) q.minEmployees = +q.minEmployees;
-  if (q.maxEmployees !== undefined) q.maxEmployees = +q.maxEmployees;
 
+//maybe put this in a user route later??
+router.get("/", ensureLoggedIn, async function (req, res, next) { 
+  //loggedin user gets plates that he made
   try {
-    const validator = jsonschema.validate(q, companySearchSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    const companies = await Company.findAll(q);
-    return res.json({ companies });
+    //get user object and their plates
+    const user = await User.get(res.locals.user.username);
+    return res.json({ user });
   } catch (err) {
     return next(err);
   }
 });
 
-/** GET /[handle]  =>  { company }
+/** GET /[plateId]  =>  { plate }
+ * Where Plate is { id, name, description, username, foods }
+ *   where foods is { foodId, plateId, fdcId }, fdcId is used to get nutrient profile
  *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
- *
- * Authorization required: none
+ * Authorization required: LoggedIn
  */
-//for plates, .get should be changed to admin and /:handle should be change to /:id or something
-router.get("/:handle", async function (req, res, next) {
+router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
+  //this route still needs testing after adding to a plateId's plate is implemented
   try {
-    const company = await Company.get(req.params.handle);
-    return res.json({ company });
+    const plate = await Plate.get(req.params.plateId);
+    return res.json({ plate });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST / { plateId }  =>  { food }
+ * plateId passed in url
+ * Req Body: { fdcId } //fdcId is text NOT integer
+ * 
+ * Returns Plate which is { id, name, description, username, foods }
+ *   where foods is { foodId, plateId, fdcId }, fdcId is used to get nutrient profile
+ * Authorization required: LoggedIn
+ */
+ router.post("/:plateId", ensureLoggedIn, async function (req, res, next) {
+  
+  try {
+    //add food to plate with req.body
+    await Plate.addFood(req.params.plateId, req.body.fdcId); //aside: list of fdcId's to 
+    //pass into here will be generated from food.js in frontend most likely
+
+    const plate = await Plate.get(req.params.plateId);
+
+    return res.json({ plate });
   } catch (err) {
     return next(err);
   }
