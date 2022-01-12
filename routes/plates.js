@@ -13,6 +13,7 @@ const User = require("../models/user");
 const plateNewSchema = require("../schemas/plateNew.json"); //name ltd to 25 chars
 // const plateUpdateSchema = require("../schemas/plateUpdate.json");
 // const plateSearchSchema = require("../schemas/plateSearch.json");
+const foodEditSchema = require("../schemas/fdcId.json");
 
 const router = new express.Router();
 
@@ -28,9 +29,9 @@ const router = new express.Router();
 router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
     req.body.username = res.locals.user.username; //determines what user is making the plate in an obj
-    console.log(res.locals.user)
+  
     const validator = jsonschema.validate(req.body, plateNewSchema);
-    console.log(req.body)
+    
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
@@ -62,6 +63,8 @@ router.delete("/delete/:plateId", ensureLoggedIn, async function (req, res, next
     return next(err);
   }
 });
+
+//routes to get all of a user's plates is in users.js route
 
 /** GET /  => { user }
  * Get a current loggedin users info (password ommitted)
@@ -98,7 +101,7 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-/** POST /[plateId] {fdcId} =>  { plate }
+/** POST /[plateId] {fdcId:string} =>  { plate }
  * 
  * Route for adding a food to a plate
  * 
@@ -113,11 +116,23 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
  router.post("/:plateId", ensureLoggedIn, async function (req, res, next) {
   
   try {
-    //add food to plate with req.body
+    
+    const validator = jsonschema.validate(req.body, foodEditSchema);
+    
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    //validation to make sure user logged in === username from plates
+    const plate = await Plate.get(req.params.plateId);
+
+    if(plate.username !== res.locals.user.username){
+      throw new UnauthorizedError('Unauthorized: This user cannot add foods to plate')
+    }
+
     await Plate.addFood(req.params.plateId, req.body.fdcId); //aside: list of fdcId's to 
     //pass into here will be generated from food.js in frontend most likely
-
-    const plate = await Plate.get(req.params.plateId);
 
     return res.status(201).json({ plate });
   } catch (err) {
@@ -125,7 +140,7 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-/** DELETE /[plateId] => { plate }
+/** DELETE /[plateId] { fdcId:"string" } => { plate }
  * 
  * route for deleting a food (fdcId) in a plate
  * 
@@ -137,14 +152,29 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
  * 
  * Authorization required: LoggedIn
  */
+
+
+//might need str json validation for fdcId
  router.delete("/:plateId", ensureLoggedIn, async function (req, res, next) {
   
   try {
-    //add food to plate with req.body
+    const validator = jsonschema.validate(req.body, foodEditSchema);
+    
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    //validation to make sure user logged in === username from plates
+    const plate = await Plate.get(req.params.plateId);
+
+    if(plate.username !== res.locals.user.username){
+      throw new UnauthorizedError('Unauthorized: This user cannot delete foods from plate')
+    }
+
     const food = await Plate.deleteFood(req.params.plateId, req.body.fdcId); //aside: list of fdcId's to 
     //pass into here will be generated from food.js in frontend most likely
-
-    const plate = await Plate.get(req.params.plateId);
+    
     plate.deletedFood = {fdcId: req.body.fdcId};
 
     return res.json({ plate });
@@ -157,7 +187,7 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
 //maybe use this route-skeleton to edit a plate's description or name
 /** PATCH /[handle] { fld1, fld2, ... } => { company } 
  *
- * Patches company data.
+ * Patches plate data.
  *
  * fields can be: { name, description, numEmployees, logo_url }
  *
@@ -165,7 +195,7 @@ router.get("/:plateId", ensureLoggedIn, async function (req, res, next) {
  *
  * Authorization required: admin
  */
-router.patch("/:handle", ensureAdmin, async function (req, res, next) {
+router.patch("/:plateId", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {

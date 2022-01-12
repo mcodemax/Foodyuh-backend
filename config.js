@@ -2,17 +2,16 @@
 
 /** Shared config for application; can be required many places. */
 
-require("dotenv").config(); //maybe revet to this ifthere's errors; require("dotenv").config();
-//might need to hchange this to default hen deploying app to heroku
+require("dotenv").config();
+
 require("colors");
 
 const SECRET_KEY = process.env.SECRET_KEY || "secret-dev"; //for authentication
+const FDC_BASE_URL = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=`;
 
-//maybe move to frontend
-const {SECRET_API_KEY} = process.env.FDC_API_KEY ? {SECRET_API_KEY: null} : require('./secret');
 //https://itnext.io/how-to-use-environment-variables-in-node-js-cb2ef0e9574a
-const FDC_API_KEY = process.env.FDC_API_KEY || SECRET_API_KEY;
-//const {FDC_API_KEY} = require('./secret')
+//https://www.youtube.com/watch?v=17UVejOw3zA
+const FDC_API_KEY = process.env.FDC_API_KEY || "KEY_NOT_HERE";
 
 //path.resolve(process.cwd(), '.env') => default 
 //https://www.npmjs.com/package/dotenv   docs
@@ -40,6 +39,7 @@ console.log("---");
 
 module.exports = {
   FDC_API_KEY,
+  FDC_BASE_URL,
   SECRET_KEY,
   PORT,
   BCRYPT_WORK_FACTOR,

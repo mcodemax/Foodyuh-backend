@@ -1,9 +1,7 @@
 const axios = require('axios');
 
-const  {SECRET_API_KEY} = require('../secret'); //del later when deploying
+const {FDC_API_KEY, FDC_BASE_URL} = require('../config'); //use this instead of SECRET_API_KEY when deploying
 
-const {FDC_API_KEY} = require('../config'); //use this instead of SECRET_API_KEY when deploying
-const FDC_BASE_URL = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=`
 //or put in another js file if running in repl?
 //get key env vars https://nodejs.dev/learn/how-to-read-environment-variables-from-nodejs
 
@@ -41,11 +39,12 @@ async function searchFdcApi(foodQuery) { //this may be better suited for the UI
         "sortOrder": "asc"
     }
     const nutrientIdsArr = [1008, 1004, 1003, 1087, 1162, 1079, 1005];
-    
+
     //https://axios-http.com/docs/post_example
 
     try {
-        const res = await axios.post(`${FDC_BASE_URL}${SECRET_API_KEY}`, query);
+        const res = await axios.post(`${FDC_BASE_URL}${FDC_API_KEY}`, query);
+
         const foods = res.data.foods;
         const foodArr = [];
 
@@ -197,5 +196,5 @@ function dummy(){
 }
 
 module.exports = {
-    searchFdcApi
+    searchFdcApi, getSingFood
 };
