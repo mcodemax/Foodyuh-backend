@@ -101,7 +101,7 @@ async function getSingFood(id){
     console.log(nutStr)
     
     try {
-        const res = await axios.get(`https://api.nal.usda.gov/fdc/v1/food/2087659?format=abridged${nutStr}&api_key=${SECRET_API_KEY}`)
+        const res = await axios.get(`https://api.nal.usda.gov/fdc/v1/food/2087659?format=abridged${nutStr}&api_key=${FDC_API_KEY}`)
         console.log(res.data)
     } catch (error) {
         return new Error(`FDC API error. code: ${error.response.data.error.code},

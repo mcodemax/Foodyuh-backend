@@ -17,9 +17,20 @@ const { ensureLoggedIn } = require("../middleware/auth");
  */
 router.get("/", ensureLoggedIn, async function (req, res, next) {
     try {
-        console.log(req.body.search)
         const foodRes = await searchFdcApi(req.body.search);
-        return res.status(200).json({ result: foodRes });
+        return res.status(200).json({ foodRes });
+    } catch (err) {
+        return next(err);
+    }
+});
+
+/**
+ * GET /fdcid { fdcId }
+ */
+router.get("/fdcid", ensureLoggedIn, async function (req, res, next) {
+    try {
+        const food = await getSingFood(req.body.fdcId);
+        return res.status(200).json({ food });
     } catch (err) {
         return next(err);
     }
