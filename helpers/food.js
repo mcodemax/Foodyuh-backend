@@ -98,18 +98,14 @@ async function getSingFood(id){
     let nutStr = nutrientNumArr.join('&nutrients=');
     nutStr = '&nutrients='.concat(nutStr);
 
-    console.log(nutStr)
-    
     try {
-        const res = await axios.get(`https://api.nal.usda.gov/fdc/v1/food/2087659?format=abridged${nutStr}&api_key=${FDC_API_KEY}`)
+        const res = await axios.get(`https://api.nal.usda.gov/fdc/v1/food/${id}?format=abridged${nutStr}&api_key=${FDC_API_KEY}`)
         console.log(res.data)
+        return res.data;
     } catch (error) {
         return new Error(`FDC API error. code: ${error.response.data.error.code},
          message: ${error.response.data.error.message}`);
     }
-    //for array of nutrients in an individual food
-    //
-
 }
 
 
