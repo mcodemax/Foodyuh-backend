@@ -1,6 +1,9 @@
 const axios = require('axios');
 
-const {FDC_API_KEY, FDC_BASE_URL} = require('../config'); //use this instead of SECRET_API_KEY when deploying
+const { FDC_API_KEY, 
+        FDC_BASE_URL, 
+        PEXELS_API_KEY,
+        PEXELS_BASE_URL } = require('../config'); //use this instead of SECRET_API_KEY when deploying
 
 //or put in another js file if running in repl?
 //get key env vars https://nodejs.dev/learn/how-to-read-environment-variables-from-nodejs
@@ -191,6 +194,27 @@ function dummy(){
     */
 }
 
+
+/** functiuon that takes query string and generates pic */
+async function pexelsReq(params) {
+    try {
+        //get params and
+        params = params.replace(' ', '%20');
+
+        //update query to be dynamic
+        const res = await axios.get(`${PEXELS_BASE_URL}search?query=${params}&per_page=25`, {
+            headers: {
+                Authorization: 'Bearer ' + PEXELS_API_KEY //the token is a variable which holds the token
+            }   
+        })
+
+        return res.data;
+    } catch (error) {
+        return new Error(`Pexels API error.`);
+    }
+
+}
+
 module.exports = {
-    searchFdcApi, getSingFood
+    searchFdcApi, getSingFood, pexelsReq
 };

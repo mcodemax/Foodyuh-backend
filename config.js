@@ -8,10 +8,12 @@ require("colors");
 
 const SECRET_KEY = process.env.SECRET_KEY || "secret-dev"; //for authentication
 const FDC_BASE_URL = `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=`;
+const PEXELS_BASE_URL = `https://api.pexels.com/v1/`;
 
 //https://itnext.io/how-to-use-environment-variables-in-node-js-cb2ef0e9574a
 //https://www.youtube.com/watch?v=17UVejOw3zA
 const FDC_API_KEY = process.env.FDC_API_KEY || "KEY_NOT_HERE";
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY || "KEY_NOT_HERE";
 
 //path.resolve(process.cwd(), '.env') => default 
 //https://www.npmjs.com/package/dotenv   docs
@@ -41,6 +43,8 @@ module.exports = {
   FDC_API_KEY,
   FDC_BASE_URL,
   SECRET_KEY,
+  PEXELS_API_KEY,
+  PEXELS_BASE_URL,
   PORT,
   BCRYPT_WORK_FACTOR,
   getDatabaseUri,
