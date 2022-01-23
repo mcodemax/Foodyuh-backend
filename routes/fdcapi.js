@@ -10,14 +10,15 @@ const { BadRequestError } = require("../expressError");
 const {searchFdcApi, getSingFood, pexelsReq} = require("../helpers/food");
 const { ensureLoggedIn } = require("../middleware/auth");
 
-/** GET / { search }
+/** GET /:search
  * Input search term
  * Output fdcapi generated food matches
  * 
+ * GET requests don't have a request body
  */
-router.get("/", ensureLoggedIn, async function (req, res, next) {
+router.get("/foods/:search", ensureLoggedIn, async function (req, res, next) {
     try {
-        const foodRes = await searchFdcApi(req.body.search);
+        const foodRes = await searchFdcApi(req.params.search);
         return res.status(200).json({ foodRes });
     } catch (err) {
         return next(err);
@@ -25,11 +26,12 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 /**
- * GET /fdcid { fdcId }
+ * GET /fdcid/:fdcId
  */
-router.get("/fdcid", ensureLoggedIn, async function (req, res, next) {
+router.get("/fdcid/:fdcId", ensureLoggedIn, async function (req, res, next) {
     try {
-        const food = await getSingFood(req.body.fdcId);
+        console.log(req.body) //from the front end {fdcId} obj not passed in
+        const food = await getSingFood(req.params.fdcId);
         return res.status(200).json({ food });
     } catch (err) {
         return next(err);
@@ -37,12 +39,13 @@ router.get("/fdcid", ensureLoggedIn, async function (req, res, next) {
 });
 
 /**
- * GET /pexels { search }
+ * GET /pexels/:search
  */
- router.get("/pexels", ensureLoggedIn, async function (req, res, next) {
+ router.get("/pexels/:search", ensureLoggedIn, async function (req, res, next) {
     try {
-        const response = await pexelsReq(req.body.search);
+        const response = await pexelsReq(req.params.search);
         return res.status(200).json({ response });
+        //in front end use a photo not avail if res is empty
     } catch (err) {
         return next(err);
     }

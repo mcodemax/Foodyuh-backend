@@ -9,42 +9,16 @@ const { ensureCorrectUserOrAdmin, ensureAdmin } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
-const userNewSchema = require("../schemas/userNew.json");
-const userUpdateSchema = require("../schemas/userUpdate.json");
+// const userNewSchema = require("../schemas/userNew.json");
+// const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
 
 
-/** POST / { user }  => { user, token }
- *
- * Adds a new user. This is not the registration endpoint --- instead, this is
- * only for admin users to add new users. The new user being added can be an
- * admin.
- *
- * This returns the newly created user and an authentication token for them:
- *  {user: { username, firstName, lastName, email, isAdmin }, token }
- *
- * Authorization required: admin
- **/
-
-router.post("/", ensureAdmin, async function (req, res, next) {
-  try {
-    const validator = jsonschema.validate(req.body, userNewSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    const user = await User.register(req.body);
-    const token = createToken(user);
-    return res.status(201).json({ user, token });
-  } catch (err) {
-    return next(err);
-  }
-});
 
 
-//add a user isPaid = true manipulation route
+
+//add a user isPaid = true, manipulation route
 
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
@@ -54,7 +28,7 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  * Authorization required: admin
  **/
 
-router.get("/", ensureAdmin, async function (req, res, next) {
+router.get("/alluserinfo", ensureAdmin, async function (req, res, next) {
   try {
     const users = await User.findAll();
     return res.json({ users });
@@ -63,18 +37,19 @@ router.get("/", ensureAdmin, async function (req, res, next) {
   }
 });
 
-
-/** GET /[username] => { user }
+/** GET / => { user: {username, firstName, lastName, email, isPaid, plates } }
+ * 
+ * where plates is { id, name, description, username }
  *
- * Returns { username, firstName, lastName, isAdmin, jobs }
- *   where jobs is { id, title, companyHandle, companyName, state }
+ * Returns loggedin user and plates.
  *
- * Authorization required: admin or same user-as-:username
+ * Authorization required: admin or correctuser
  **/
 
-router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
+router.get("/user/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
   try {
-    const user = await User.get(req.params.username);
+    const user = await User.get(res.locals.user.username);
+    
     return res.json({ user });
   } catch (err) {
     return next(err);
@@ -87,7 +62,7 @@ router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, nex
  * Data can include:
  *   { firstName, lastName, password, email }
  *
- * Returns { username, firstName, lastName, email, isAdmin }
+ * Returns { username, firstName, lastName, email, isAdmin, isPaid }
  *
  * Authorization required: admin or same-user-as-:username
  **/
@@ -121,3 +96,5 @@ router.delete("/:username", ensureCorrectUserOrAdmin, async function (req, res, 
     return next(err);
   }
 });
+
+module.exports = router;

@@ -66,24 +66,6 @@ router.delete("/delete/:plateId", ensureLoggedIn, async function (req, res, next
 
 //routes to get all of a user's plates is in users.js route
 
-/** GET /  => { user }
- * Get a current loggedin users info (password ommitted)
- * Returns { user } where user is { username, first_name, last_name, isAdmin, isPaid, plates }
- * where plates is { id, name, description }
- * Authorization required: LoggedIn
- */
-
-//maybe put this in a user route later??
-router.get("/", ensureLoggedIn, async function (req, res, next) { 
-  //loggedin user gets plates that he made
-  try {
-    //get user object and their plates
-    const user = await User.get(res.locals.user.username);
-    return res.json({ user });
-  } catch (err) {
-    return next(err);
-  }
-});
 
 /** GET /[plateId]  =>  { plate }
  * Where Plate is { id, name, description, username, foods }
