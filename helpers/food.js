@@ -36,7 +36,7 @@ const { FDC_API_KEY,
 async function searchFdcApi(foodQuery) { //this may be better suited for the UI
     const query = {
         "query": `${foodQuery}`,
-        "pageSize": 25,
+        "pageSize": 10,
         "pageNumber": 1,
         "sortBy": "dataType.keyword",
         "sortOrder": "asc"
@@ -202,7 +202,7 @@ async function pexelsReq(params) {
         params = params.replace(' ', '%20');
 
         //update query to be dynamic
-        const res = await axios.get(`${PEXELS_BASE_URL}search?query=${params}&per_page=25`, {
+        const res = await axios.get(`${PEXELS_BASE_URL}search?query=${params}&per_page=10`, {
             headers: {
                 Authorization: 'Bearer ' + PEXELS_API_KEY //the token is a variable which holds the token
             }   

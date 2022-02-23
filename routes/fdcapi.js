@@ -44,6 +44,7 @@ router.get("/fdcid/:fdcId", ensureLoggedIn, async function (req, res, next) {
  router.get("/pexels/:search", ensureLoggedIn, async function (req, res, next) {
     try {
         const response = await pexelsReq(req.params.search);
+        console.log(req.params.search, 'please')
         return res.status(200).json({ response });
         //in front end use a photo not avail if res is empty
     } catch (err) {

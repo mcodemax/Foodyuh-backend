@@ -19,7 +19,8 @@ const router = new express.Router();
 
 
 /** POST / { plate } =>  { plate }
- *
+ * 
+ * Route for creating a plate
  * plate should be { name, description }
  *
  * Returns { id, name, description, username }

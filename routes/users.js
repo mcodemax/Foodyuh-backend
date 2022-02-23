@@ -9,16 +9,11 @@ const { ensureCorrectUserOrAdmin, ensureAdmin } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
-// const userNewSchema = require("../schemas/userNew.json");
-// const userUpdateSchema = require("../schemas/userUpdate.json");
+const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
 
-
-
-
-
-//add a user isPaid = true, manipulation route
+//todo: add a user isPaid = true, manipulation route
 
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
