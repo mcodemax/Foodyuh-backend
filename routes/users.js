@@ -13,9 +13,6 @@ const userUpdateSchema = require("../schemas/userUpdate.json");
 
 const router = express.Router();
 
-//todo: add a user isPaid = true, manipulation route
-
-
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
  * Returns list of all users.
@@ -51,7 +48,6 @@ router.get("/user/:username", ensureCorrectUserOrAdmin, async function (req, res
   }
 });
 
-
 /** PATCH /[username] { user } => { user }
  *
  * Data can include:
@@ -82,7 +78,6 @@ router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, n
  *
  * Authorization required: admin or same-user-as-:username
  **/
-
 router.delete("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
   try {
     await User.remove(req.params.username);

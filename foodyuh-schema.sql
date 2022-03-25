@@ -17,17 +17,10 @@ CREATE TABLE plates (
     REFERENCES users ON DELETE CASCADE
 );
 
--- CREATE TABLE plates_users (
---   plate_id INTEGER
---     REFERENCES plates ON DELETE CASCADE,
---   username VARCHAR(25)
---     REFERENCES users ON DELETE CASCADE
--- ); --may not be needed in schema
-
 CREATE TABLE plates_foods (
   id SERIAL PRIMARY KEY,
   plate_id INTEGER
     REFERENCES plates ON DELETE CASCADE,
-  fdc_id TEXT NOT NULL --make into a number when coding into js
+  fdc_id TEXT NOT NULL
 );
 

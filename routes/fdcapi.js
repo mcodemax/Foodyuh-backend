@@ -13,12 +13,11 @@ const { ensureLoggedIn } = require("../middleware/auth");
 /** GET /:search
  * Input search term
  * Output fdcapi generated food matches
- * 
- * GET requests don't have a request body
  */
 router.get("/foods/:search", ensureLoggedIn, async function (req, res, next) {
     try {
         const foodRes = await searchFdcApi(req.params.search);
+
         return res.status(200).json({ foodRes });
     } catch (err) {
         return next(err);
@@ -30,8 +29,8 @@ router.get("/foods/:search", ensureLoggedIn, async function (req, res, next) {
  */
 router.get("/fdcid/:fdcId", ensureLoggedIn, async function (req, res, next) {
     try {
-        console.log(req.body) //from the front end {fdcId} obj not passed in
         const food = await getSingFood(req.params.fdcId);
+
         return res.status(200).json({ food });
     } catch (err) {
         return next(err);
@@ -44,9 +43,8 @@ router.get("/fdcid/:fdcId", ensureLoggedIn, async function (req, res, next) {
  router.get("/pexels/:search", ensureLoggedIn, async function (req, res, next) {
     try {
         const response = await pexelsReq(req.params.search);
-        console.log(req.params.search, 'please')
+
         return res.status(200).json({ response });
-        //in front end use a photo not avail if res is empty
     } catch (err) {
         return next(err);
     }

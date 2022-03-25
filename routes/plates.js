@@ -11,7 +11,7 @@ const {
 } = require('../middleware/auth');
 const Plate = require('../models/plate');
 
-const plateNewSchema = require('../schemas/plateNew.json'); //name ltd to 25 chars
+const plateNewSchema = require('../schemas/plateNew.json');
 const foodEditSchema = require('../schemas/fdcId.json');
 
 const router = new express.Router();
@@ -52,7 +52,6 @@ router.delete(
   async function (req, res, next) {
     try {
       //make sure the plate being deleted belongs to the user
-      // if not throw an err
       const plate = await Plate.get(req.params.plateId);
       if (res.locals.user.username !== plate.username) {
         throw new UnauthorizedError(
@@ -116,8 +115,7 @@ router.post('/:plateId', ensureLoggedIn, async function (req, res, next) {
       );
     }
 
-    await Plate.addFood(req.params.plateId, req.body.fdcId); //aside: list of fdcId's to
-    //pass into here will be generated from food.js in frontend most likely
+    await Plate.addFood(req.params.plateId, req.body.fdcId);
 
     return res.status(201).json({ plate });
   } catch (err) {
@@ -160,32 +158,6 @@ router.delete('/:plateId', ensureLoggedIn, async function (req, res, next) {
     plate.deletedFood = { fdcId: req.body.fdcId };
 
     return res.json({ plate });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-//maybe use this route-skeleton to edit a plate's description or name
-/** PATCH /[handle] { fld1, fld2, ... } => { company }
- *
- * Patches plate data.
- *
- * fields can be: { name, description, numEmployees, logo_url }
- *
- * Returns { handle, name, description, numEmployees, logo_url }
- *
- * Authorization required: loggedIn
- */
-router.patch('/:plateId', ensureLoggedIn, async function (req, res, next) {
-  try {
-    const validator = jsonschema.validate(req.body, companyUpdateSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    const company = await Company.update(req.params.handle, req.body);
-    return res.json({ company });
   } catch (err) {
     return next(err);
   }
