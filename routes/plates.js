@@ -6,9 +6,7 @@ const jsonschema = require('jsonschema');
 const express = require('express');
 
 const { BadRequestError, UnauthorizedError } = require('../expressError');
-const {
-  ensureLoggedIn,
-} = require('../middleware/auth');
+const { ensureLoggedIn } = require('../middleware/auth');
 const Plate = require('../models/plate');
 
 const plateNewSchema = require('../schemas/plateNew.json');
@@ -67,16 +65,13 @@ router.delete(
   }
 );
 
-//routes to get all of a user's plates is in users.js route
-
-/** GET /[plateId]  =>  { plate }
+/** GET /[plateId]  => { plate }
  * Where Plate is { id, name, description, username, foods }
  *   where foods is { foodId, plateId, fdcId }, fdcId is used to get nutrient profile
  *
  * Authorization required: LoggedIn
  */
 router.get('/:plateId', ensureLoggedIn, async function (req, res, next) {
-  //this route still needs testing after adding to a plateId's plate is implemented
   try {
     const plate = await Plate.get(req.params.plateId);
     return res.json({ plate });
@@ -89,7 +84,7 @@ router.get('/:plateId', ensureLoggedIn, async function (req, res, next) {
  *
  * Route for adding a food to a plate
  *
- * plateId passed in url
+ * plateId is passed in url
  * Req Body: { fdcId } //fdcId is text NOT integer
  *
  * Returns Plate which is { id, name, description, username, foods }
