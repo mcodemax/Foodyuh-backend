@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { nutrientNumbers, nutrientIds } = require('./nutrientKeys');
 
 const {
   FDC_API_KEY,
@@ -16,7 +17,15 @@ async function searchFdcApi(foodQuery) {
     sortBy: 'dataType.keyword',
     sortOrder: 'asc',
   };
-  const nutrientIdsArr = [1008, 1004, 1003, 1087, 1162, 1079, 1005];
+  const nutrientIdsArr = [
+    nutrientNumbers.kcals,
+    nutrientNumbers.protein,
+    nutrientNumbers.carbs,
+    nutrientNumbers.fats,
+    nutrientNumbers.fiber,
+    nutrientNumbers.vitC,
+    nutrientNumbers.calcium,
+  ];
 
   try {
     const res = await axios.post(`${FDC_BASE_URL}${FDC_API_KEY}`, query);
@@ -67,7 +76,15 @@ async function searchFdcApi(foodQuery) {
 
 /** API call a single food from fdcId */
 async function getSingFood(id) {
-  const nutrientNumArr = [208, 204, 203, 301, 401, 291, 205];
+  const nutrientNumArr = [
+    nutrientIds.kcals,
+    nutrientIds.protein,
+    nutrientIds.carbs,
+    nutrientIds.fats,
+    nutrientIds.fiber,
+    nutrientIds.vitC,
+    nutrientIds.calcium,
+  ];
   let nutStr = nutrientNumArr.join('&nutrients=');
   nutStr = '&nutrients='.concat(nutStr);
 
