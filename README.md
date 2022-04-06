@@ -2,7 +2,7 @@
 Make and analyze your plate.
 ###### Developer: Maxwell Johnson
 
-To install required frontend depencies, run the following in terminal:
+To install required depencies, run the following in terminal:
 
 `npm i`
 
