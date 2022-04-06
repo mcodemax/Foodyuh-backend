@@ -156,10 +156,6 @@ class User {
     return user;
   }
 
-  //in REPL
-  //node -i -e "$(< user.js)"
-  //promiseX.then(e => console.log(e))
-
   /** Update user data with `data`.
    *
    * This is a "partial update" --- it's fine if data doesn't contain

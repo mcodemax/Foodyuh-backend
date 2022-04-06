@@ -160,12 +160,3 @@ router.delete('/:plateId', ensureLoggedIn, async function (req, res, next) {
 
 module.exports = router;
 
-/*
-Summary of routes:
-  POST / { plate } =>  { plate }
-  DELETE /delete/[plateId] => { deletedPlate }
-  GET /  => { user }
-  GET /[plateId]  =>  { plate }
-  POST /[plateId] {fdcId} =>  { plate }
-  DELETE /[plateId] => { plate }
-*/

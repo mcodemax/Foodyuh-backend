@@ -1,12 +1,7 @@
 'use strict';
 
-/** Routes for connecting to fdcapi. */
-
-const jsonschema = require('jsonschema');
-const { FDC_BASE_URL, FDC_API_KEY, PEXELS_API_KEY } = require('../config');
 const express = require('express');
 const router = new express.Router();
-const { BadRequestError } = require('../expressError');
 const { searchFdcApi, getSingFood, pexelsReq } = require('../helpers/food');
 const { ensureLoggedIn } = require('../middleware/auth');
 
@@ -16,7 +11,7 @@ const { ensureLoggedIn } = require('../middleware/auth');
  */
 router.get('/foods/:search', ensureLoggedIn, async function (req, res, next) {
   try {
-    const foodRes = await searchFdcApi(req.params.search);
+    const foodRes = await searchFdcApi(req.params.search); 
 
     return res.status(200).json({ foodRes });
   } catch (err) {

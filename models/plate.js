@@ -1,15 +1,7 @@
 'use strict';
 
 const db = require('../db');
-const bcrypt = require('bcrypt');
-const { sqlForPartialUpdate } = require('../helpers/sql');
-const {
-  NotFoundError,
-  BadRequestError,
-  UnauthorizedError,
-} = require('../expressError');
-
-const { BCRYPT_WORK_FACTOR } = require('../config.js');
+const { NotFoundError, BadRequestError } = require('../expressError');
 
 /** Plate class for db queries related to Plates */
 class Plate {
